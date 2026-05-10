@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StudyTrack — Python Batch</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#16161f;--bg4:#1c1c28;--bg5:#222233;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);--border3:rgba(255,255,255,0.16);
+  --text:#f0f0f8;--text2:#9090b0;--text3:#505070;
+  --accent:#7c6fff;--accent2:#a594ff;--accent-bg:rgba(124,111,255,0.12);--accent-border:rgba(124,111,255,0.3);
+  --green:#22d3a0;--green-bg:rgba(34,211,160,0.1);--green-border:rgba(34,211,160,0.25);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);
+  --red:#ff5f5f;--red-bg:rgba(255,95,95,0.1);--red-border:rgba(255,95,95,0.25);
+  --blue:#63b3ff;--blue-bg:rgba(99,179,255,0.1);
+  --sidebar:220px;--topbar:58px;
+  font-family:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:'DM Sans',sans-serif}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:99px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(124,111,255,0.3)}50%{box-shadow:0 0 40px rgba(124,111,255,0.6)}}
+.fade-up{animation:fadeUp 0.35s ease forwards}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+.auth-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.auth-blob-1{width:500px;height:500px;background:rgba(124,111,255,0.08);top:-150px;left:-150px}
+.auth-blob-2{width:400px;height:400px;background:rgba(34,211,160,0.05);bottom:-100px;right:-100px}
+.auth-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:60px 60px}
+.auth-card{background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:40px;width:100%;max-width:420px;position:relative;z-index:1;animation:fadeUp 0.5s ease}
+.auth-logo{text-align:center;margin-bottom:32px}
+.auth-logo-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#5b4fff);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;animation:glow 3s ease-in-out infinite}
+.auth-logo h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.auth-logo p{font-size:13px;color:var(--text2);margin-top:4px}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.role-card{background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s}
+.role-card:hover{border-color:var(--accent);background:var(--bg4);transform:translateY(-3px)}
+.role-card-icon{font-size:32px;margin-bottom:10px}
+.role-card-label{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
+.role-card-sub{font-size:12px;color:var(--text2);margin-top:3px}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.6px}
+.form-input,.form-select,.form-textarea{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;transition:all 0.2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,111,255,0.15)}
+.form-select option{background:var(--bg3)}
+.form-textarea{resize:vertical;min-height:140px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);margin-bottom:24px;cursor:pointer;background:none;border:none;transition:color 0.15s}
+.back-btn:hover{color:var(--text)}
+
+/* SHELL */
+.app-shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:var(--topbar);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.page-content{flex:1;overflow-y:auto;padding:28px}
+
+/* SIDEBAR */
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.s-logo-row{display:flex;align-items:center;gap:10px}
+.s-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#5b4fff);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.s-logo-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:800}
+.s-logo-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.sidebar-section{padding:16px 16px 4px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;margin:1px 8px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.15s}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.sidebar-bottom{border-top:1px solid var(--border);padding:12px 8px}
+.user-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;margin-bottom:4px}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#5b4fff);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0}
+.user-name{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:10px;color:var(--text3)}
+.logout-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;font-size:13px;color:var(--red);cursor:pointer;transition:all 0.15s;width:100%}
+.logout-btn:hover{background:var(--red-bg)}
+.topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;flex:1}
+.topbar-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
+
+/* COMPONENTS */
+.btn{padding:10px 18px;border-radius:9px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:all 0.15s;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-primary{background:var(--accent);color:white;border:none}
+.btn-primary:hover{background:#6a5fff;transform:translateY(-1px)}
+.btn-secondary{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--bg5)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px}
+.card-hover{transition:all 0.2s;cursor:pointer}
+.card-hover:hover{border-color:var(--border2);transform:translateY(-2px)}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.badge-accent{background:var(--accent-bg);color:var(--accent2)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-lock{background:rgba(255,255,255,0.05);color:var(--text3)}
+.progress-bar{height:5px;background:var(--bg5);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:99px;transition:width 0.6s ease}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px}
+.stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.stat-label{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
+.stat-value{font-family:'Syne',sans-serif;font-size:22px;font-weight:800}
+.page-header{margin-bottom:24px}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.page-sub{font-size:13px;color:var(--text2);margin-top:5px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.page-content{padding:16px}.sidebar{position:fixed;z-index:200;height:100vh;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.menu-btn{display:flex!important}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(6px);animation:fadeIn 0.2s}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:28px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;animation:fadeUp 0.25s ease}
+.modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:20px}
+
+/* TOPIC CARD */
+.topic-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s}
+.topic-card:hover{border-color:var(--border2);background:var(--bg4)}
+.topic-card.completed{border-color:var(--green-border);background:rgba(34,211,160,0.04)}
+.day-pill{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border);padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;min-width:50px;text-align:center;flex-shrink:0;font-family:'Syne',sans-serif}
+
+/* COURSE CARD */
+.course-card{background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:22px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.course-card:not(.locked):hover{border-color:var(--accent-border);transform:translateY(-4px)}
+.course-card.locked{cursor:not-allowed;opacity:0.65}
+.course-card-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:var(--accent);opacity:0.04;top:-40px;right:-40px;filter:blur(30px)}
+.course-icon{font-size:32px;margin-bottom:14px}
+.course-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:6px}
+
+/* MCQ */
+.mcq-option{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1px solid var(--border2);margin-bottom:8px;cursor:pointer;transition:all 0.15s;font-size:14px}
+.mcq-option:hover{border-color:var(--accent);background:var(--accent-bg)}
+.mcq-option.selected{border-color:var(--accent);background:var(--accent-bg);color:var(--accent2)}
+.mcq-option.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.mcq-option.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.mcq-circle{width:22px;height:22px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700}
+
+/* VIDEO */
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;background:var(--bg4)}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.video-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text3)}
+.lang-btn{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all 0.15s}
+.lang-btn.active{background:var(--accent-bg);color:var(--accent2);border-color:var(--accent-border)}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:10px;font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.alert-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.alert-error{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.alert-info{background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* LOCKED */
+.locked-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;text-align:center}
+.lock-icon-big{width:80px;height:80px;border-radius:24px;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:20px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
+.menu-btn{display:none;align-items:center;justify-content:center;padding:7px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STUDYTRACK LMS — NO BACKEND, SINGLE FILE, NETLIFY READY
+// ═══════════════════════════════════════════════════════════
+const FORMSPREE='https://formspree.io/f/xbdwpjdp';
+
+// ── STUDENTS (hardcoded) ────────────────────────────────────
+const STUDENTS=[
+  {id:'s1',name:'Chetan',   password:'chetan@123',  avatar:'CH'},
+  {id:'s2',name:'Vyshnavi', password:'vyshu@123',   avatar:'VY'},
+  {id:'s3',name:'Yaswitha', password:'yashu@123',   avatar:'YA'},
+  {id:'s4',name:'Manasa',   password:'manasa@123',  avatar:'MA'},
+  {id:'s5',name:'Sreeja',   password:'sreeja@123',  avatar:'SR'},
+  {id:'s6',name:'Vennela',  password:'vennela@123', avatar:'VE'},
+  {id:'s7',name:'Joshika',  password:'joshi@123',   avatar:'JO'},
+];
+
+// ── TOPICS (22 Python topics) ───────────────────────────────
+// 👇 PASTE YOUR YOUTUBE EMBED LINKS BELOW FOR EACH TOPIC
+// Format: 'https://www.youtube.com/embed/VIDEO_ID'
+// Leave as '' if you don't have a video for that language yet
+const TOPICS=[
+  {id:'t1', day:1,  title:'Introduction to Python',
+    videos:{ english:'https://www.youtube.com/embed/hEgO047GxaQ', hindi:'https://www.youtube.com/embed/XIR20HH8mNY', telugu:'https://www.youtube.com/embed/ZkndfcIyxMM'},
+    desc:'What is Python? Why Python? Installation, IDLE, running your first program. Interpreted vs compiled languages.',
+    hasMCQ:true, hasProgram:false},
+
+  {id:'t2', day:2,  title:'Variables',
+    videos:{ english:'https://www.youtube.com/embed/cQT33yu9pY8', hindi:'https://www.youtube.com/embed/A-8otxC6-3g', telugu:'https://www.youtube.com/embed/MzLBCIPUOVw' },
+    desc:'Variable declaration, naming rules, assignment operators, multiple assignment, variable swapping.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a Python program to swap two variables without using a third variable. Print values before and after swapping.'},
+
+  {id:'t3', day:3,  title:'Data Types',
+    videos:{ english:'https://www.youtube.com/embed/TTepNRy0wj8', hindi:'https://www.youtube.com/embed/k7OTRmVrw7w', telugu:'https://www.youtube.com/embed/JaR3f1e1dbo' },
+    desc:'int, float, str, bool — the four main data types. type() function, type checking, dynamic typing in Python.',
+    hasMCQ:true, hasProgram:false},
+
+  {id:'t4', day:4,  title:'Type Casting',
+    videos:{ english:'https://www.youtube.com/embed/Qtq83lAoogM', hindi:'https://www.youtube.com/embed/Pu5bqySSSS0', telugu:'https://www.youtube.com/embed/_7P5QotQTVw' },
+    desc:'int(), float(), str(), bool() conversions. Implicit vs explicit casting. Common errors during conversion.',
+    hasMCQ:false, hasProgram:true, programQ:'Write a program to take a float input from the user and convert it to int and string. Print all three values with their data types using type().'},
+
+  {id:'t5', day:5,  title:'Operators',
+    videos:{ english:'https://www.youtube.com/embed/v5MR5JnKcZI', hindi:'https://www.youtube.com/embed/brMePLDi0-o', telugu:'https://www.youtube.com/embed/VdEfCoYaxfI' },
+    desc:'Arithmetic (+,-,*,/,//,%,**), comparison, logical (and/or/not), assignment, bitwise, identity (is) and membership (in) operators.',
+    hasMCQ:true, hasProgram:false},
+
+  {id:'t6', day:6,  title:'Input / Output',
+    videos:{ english:'https://www.youtube.com/embed/kvKvYXXuHoo', hindi:'https://www.youtube.com/embed/VisH16K-jzw', telugu:'https://www.youtube.com/embed/VbAzQAN699s' },
+    desc:'input() function, print() with sep and end parameters, f-strings, format() method, taking multiple inputs in one line.',
+    hasMCQ:false, hasProgram:true, programQ:'Write a program that takes your name and age as input and prints: Hello [name]! You will be [age+1] years old next year.'},
+
+  {id:'t7', day:7,  title:'Conditional Statements',
+    videos:{ english:'https://www.youtube.com/embed/PqFKRqpHrjw', hindi:'https://www.youtube.com/embed/9xiFcK3MRYA', telugu:'https://www.youtube.com/embed/rUl4N9ulW-E' },
+    desc:'if, elif, else statements. Nested conditions. Ternary (one-line if-else) operator. Real-world decision examples.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a program to check if a number entered by the user is positive, negative, or zero — and also whether it is even or odd.'},
+
+  {id:'t8', day:8,  title:'Loops',
+    videos:{ english:'https://www.youtube.com/embed/94UHCEmprCY', hindi:'https://www.youtube.com/embed/S73thl0AyFU', telugu:'https://www.youtube.com/embed/e1RBzKGNbR0' },
+    desc:'for loop, while loop, range(), break, continue, pass keywords, nested loops, loop-else block.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a program to print the full multiplication table (1 to 10) of any number entered by the user.'},
+
+  {id:'t9', day:9,  title:'Strings',
+    videos:{ english:'https://www.youtube.com/embed/Ctqi5Y4X-jA', hindi:'https://www.youtube.com/embed/kMNFQYArrLg', telugu:'https://www.youtube.com/embed/IWk44K-6bnQ' },
+    desc:'String indexing, slicing, concatenation, repetition, escape characters, raw strings, and all important string methods.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a program to count the number of vowels and consonants in a string entered by the user. Ignore spaces.'},
+
+  {id:'t10',day:10, title:'Lists',
+    videos:{ english:'https://www.youtube.com/embed/1tnFQDo05hQ', hindi:'https://www.youtube.com/embed/eF6nK5bSlmg', telugu:'https://www.youtube.com/embed/n4orr02dEvw' },
+    desc:'List creation, indexing, slicing, append/insert/remove/pop/sort/reverse methods, list traversal with loops.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a program to find the largest and smallest element in a list of numbers entered by the user WITHOUT using the built-in min() or max() functions.'},
+
+  {id:'t11',day:11, title:'Tuples',
+    videos:{ english:'https://www.youtube.com/embed/zLFituJxj6c', hindi:'https://www.youtube.com/embed/5WwVZ0Lb198', telugu:'https://www.youtube.com/embed/UUpuoZr2mro' },
+    desc:'Tuple creation, immutability, packing and unpacking, tuple methods (count, index), difference between tuple and list.',
+    hasMCQ:true, hasProgram:false},
+
+  {id:'t12',day:12, title:'Sets',
+    videos:{ english:'https://www.youtube.com/embed/t9j8lCUGZXo', hindi:'https://www.youtube.com/embed/XoyqcPmS58I', telugu:'https://www.youtube.com/embed/MbzxHOHzj1I' },
+    desc:'Set creation, add/remove/discard, union, intersection, difference, symmetric difference, frozenset.',
+    hasMCQ:false, hasProgram:true, programQ:'Write a program that takes two lists from the user and uses sets to print: (1) common elements, (2) elements only in the first list, (3) elements only in the second list.'},
+
+  {id:'t13',day:13, title:'Dictionaries',
+    videos:{ english:'https://www.youtube.com/embed/MZZSMaEAC2g', hindi:'https://www.youtube.com/embed/brnsFCa7npc', telugu:'https://www.youtube.com/embed/S5zYIYFrFZY' },
+    desc:'Dict creation, accessing keys/values/items, CRUD operations, nested dictionaries, dict comprehension, get() method.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a program to count how many times each word appears in a sentence entered by the user. Use a dictionary to store word counts.'},
+
+  {id:'t14',day:14, title:'Functions',
+    videos:{ english:'https://www.youtube.com/embed/u-OmVr_fT4s', hindi:'https://www.youtube.com/embed/h8V1IOolYA0', telugu:'https://www.youtube.com/embed/pSj9VLQOxTg' },
+    desc:'def keyword, parameters vs arguments, default parameters, *args, **kwargs, return values, local vs global scope.',
+    hasMCQ:true, hasProgram:true, programQ:'Write two functions: (1) one that takes a list of numbers and returns their average, (2) one that checks if a number is prime. Test both.'},
+
+  {id:'t15',day:15, title:'Lambda Functions',
+    videos:{ english:'https://www.youtube.com/embed/HQNiSfb795A', hindi:'https://www.youtube.com/embed/LQatU6WFZiM', telugu:'https://www.youtube.com/embed/nSPb2lStuDk' },
+    desc:'lambda keyword syntax, anonymous functions, use with map(), filter(), sorted(). Differences from regular def functions.',
+    hasMCQ:false, hasProgram:true, programQ:'Use lambda with map() to square all numbers in a list. Use lambda with filter() to get only the even numbers from the same list. Print both results.'},
+
+  {id:'t16',day:16, title:'List Comprehension',
+    videos:{ english:'https://www.youtube.com/embed/6bHDQtVfsCM', hindi:'https://www.youtube.com/embed/uhvljGKWges', telugu:'https://www.youtube.com/embed/T5c372jjAPA' },
+    desc:'Syntax of list comprehension, adding conditions inside comprehension, nested comprehension, dict and set comprehension.',
+    hasMCQ:true, hasProgram:true, programQ:'Use a single list comprehension to create a list of squares of all even numbers from 1 to 50. Print the result.'},
+
+  {id:'t17',day:17, title:'Exception Handling',
+    videos:{ english:'https://www.youtube.com/embed/K1n0YQlcPT0', hindi:'https://www.youtube.com/embed/YJoFrG3XHYM', telugu:'https://www.youtube.com/embed/DGIZ6f_lpLQ' },
+    desc:'try, except, else, finally blocks. Multiple exceptions. Raising exceptions with raise. Custom exceptions. Common Python errors.',
+    hasMCQ:true, hasProgram:true, programQ:'Write a program that asks the user for two numbers and divides the first by the second. Handle ZeroDivisionError and ValueError with proper messages.'},
+
+  {id:'t18',day:18, title:'File Handling',
+    videos:{ english:'https://www.youtube.com/embed/aequTxAvQq4', hindi:'https://www.youtube.com/embed/bJYqSIS10IQ', telugu:'https://www.youtube.com/embed/CCLq1mE0-08' },
+    desc:'open() function, read/write/append modes, with statement, readlines(), writelines(), checking if file exists.',
+    hasMCQ:false, hasProgram:true, programQ:'Write a program that: (1) creates a file called students.txt, (2) writes 5 student names to it, (3) reads the file and prints each name on a new line.'},
+
+  {id:'t19',day:19, title:'OOP Basics',
+    videos:{ english:'https://www.youtube.com/embed/q2SGW2VgwAM', hindi:'https://www.youtube.com/embed/HQnoYzxOHMw', telugu:'https://www.youtube.com/embed/f8pUB7fJeoU' },
+    desc:'Classes, objects, __init__ method, self keyword, instance vs class variables, methods, inheritance, encapsulation basics.',
+    hasMCQ:true, hasProgram:true, programQ:'Create a Student class with name, age, and marks attributes. Add a method to display student info and another method to check if the student passed (marks >= 35).'},
+
+  {id:'t20',day:20, title:'Modules & Packages',
+    videos:{ english:'https://www.youtube.com/embed/4ubEUFgnbLI', hindi:'https://www.youtube.com/embed/6mw_lWlHCYk', telugu:'https://www.youtube.com/embed/M-qkh9_BJ6I' },
+    desc:'import statement, from...import, as alias, built-in modules: math, random, datetime, os. Creating and importing your own module.',
+    hasMCQ:false, hasProgram:true, programQ:'Write a program using the random module to simulate rolling a 6-sided dice 10 times. Count and print how many times each number (1 to 6) appeared.'},
+
+  {id:'t21',day:21, title:'pip Basics',
+    videos:{ english:'https://www.youtube.com/embed/sidzL1XoHCw', hindi:'https://www.youtube.com/embed/LWj708NOMDQ', telugu:'https://www.youtube.com/embed/FkR15-BzVLk' },
+    desc:'What is pip, pip install, pip uninstall, pip list, pip freeze > requirements.txt. Overview of popular libraries.',
+    hasMCQ:true, hasProgram:false},
+
+  {id:'t22',day:22, title:'Virtual Environment',
+    videos:{ english:'https://www.youtube.com/embed/Y21OR1OPC9A', hindi:'https://www.youtube.com/embed/hCT2sjGRjdw', telugu:'https://www.youtube.com/embed/wNqFD669JuA' },
+    desc:'Why virtual environments matter, creating with python -m venv, activating/deactivating, installing packages inside venv, project isolation.',
+    hasMCQ:false, hasProgram:false},
+];
+
+// ── MCQ QUESTIONS ────────────────────────────────────────────
+const MCQS={
+  t1:[
+    {q:'Who created Python?',opts:['James Gosling','Guido van Rossum','Dennis Ritchie','Bjarne Stroustrup'],ans:1},
+    {q:'Python is which type of language?',opts:['Compiled','Interpreted','Assembly','Machine level'],ans:1},
+    {q:'Which file extension is used for Python files?',opts:['.java','.py','.pt','.python'],ans:1},
+  ],
+  t2:[
+    {q:'Which is a valid Python variable name?',opts:['2var','my-var','_myVar','class'],ans:2},
+    {q:'What does x, y = y, x do in Python?',opts:['Gives an error','Copies x into y','Swaps values of x and y','Deletes both'],ans:2},
+  ],
+  t3:[
+    {q:'What is the data type of 3.14?',opts:['int','str','float','bool'],ans:2},
+    {q:'Which function is used to find the data type?',opts:['typeof()','datatype()','type()','gettype()'],ans:2},
+    {q:'What is bool(0) in Python?',opts:['True','False','0','Error'],ans:1},
+  ],
+  t5:[
+    {q:'What does the // operator do?',opts:['Regular division','Floor division','Modulus','Power'],ans:1},
+    {q:'What is the result of 10 % 3?',opts:['3','1','0','4'],ans:1},
+    {q:'Which operator is used to check identity?',opts:['==','is','===','equals'],ans:1},
+  ],
+  t7:[
+    {q:'Which keyword is used for else-if in Python?',opts:['elseif','else if','elif','else:if'],ans:2},
+    {q:'What does this return: "Even" if 4%2==0 else "Odd"?',opts:['Odd','Even','Error','None'],ans:1},
+  ],
+  t8:[
+    {q:'What does range(1, 6) produce?',opts:['1 to 6','1 to 5','0 to 5','0 to 6'],ans:1},
+    {q:'Which statement skips the current loop iteration?',opts:['break','pass','skip','continue'],ans:3},
+    {q:'What does break do in a loop?',opts:['Skips one iteration','Exits the loop completely','Pauses execution','None of these'],ans:1},
+  ],
+  t9:[
+    {q:'What does "hello"[1] return?',opts:['h','e','l','o'],ans:1},
+    {q:'Which method converts a string to uppercase?',opts:['.upper()','toUpper()','uppercase()','caps()'],ans:0},
+    {q:'What is "hello"[::-1]?',opts:['hello','olleh','Error','None'],ans:1},
+  ],
+  t10:[
+    {q:'Which method adds an element to the end of a list?',opts:['add()','insert()','append()','push()'],ans:2},
+    {q:'What does list.pop() do by default?',opts:['Removes first element','Removes last element','Clears the list','Returns error'],ans:1},
+    {q:'How do you get the length of a list?',opts:['list.size()','len(list)','list.length','count(list)'],ans:1},
+  ],
+  t11:[
+    {q:'Tuples in Python are?',opts:['Mutable','Immutable','Both mutable and immutable','Neither'],ans:1},
+    {q:'How do you create a tuple with a single element?',opts:['(1)','(1,)','[1]','{1}'],ans:1},
+  ],
+  t13:[
+    {q:'How do you access a value in a Python dictionary?',opts:['dict.key','dict[key]','dict->key','dict.get[key]'],ans:1},
+    {q:'Which method returns all keys of a dictionary?',opts:['.keys()','getKeys()','allkeys()','keylist()'],ans:0},
+  ],
+  t14:[
+    {q:'Which keyword is used to define a function in Python?',opts:['func','define','def','function'],ans:2},
+    {q:'What is *args used for in a function?',opts:['Keyword arguments','Variable number of positional arguments','Default arguments','None of these'],ans:1},
+  ],
+  t16:[
+    {q:'Which is the correct list comprehension syntax?',opts:['[x for x in range(5)]','(x for x in range(5))','for x in range(5) []','None of these'],ans:0},
+    {q:'What does [x**2 for x in range(3)] return?',opts:['[1,4,9]','[0,1,4]','[0,1,2]','[1,2,3]'],ans:1},
+  ],
+  t17:[
+    {q:'Which block ALWAYS executes in try-except-finally?',opts:['try','except','else','finally'],ans:3},
+    {q:'What exception is raised when dividing by zero?',opts:['ValueError','ZeroDivisionError','TypeError','ArithmeticError'],ans:1},
+  ],
+  t19:[
+    {q:'What is __init__ in a Python class?',opts:['A destructor','A constructor method','A built-in module','A keyword'],ans:1},
+    {q:'What does self refer to in a class method?',opts:['The class itself','The current object instance','A built-in function','None'],ans:1},
+    {q:'What is inheritance in OOP?',opts:['Copying variables between files','A child class using features of a parent class','Deleting a class','None of these'],ans:1},
+  ],
+  t21:[
+    {q:'What is pip in Python?',opts:['A Python code editor','A package installer for Python','A Python compiler','A Python debugger'],ans:1},
+    {q:'Which command installs a package using pip?',opts:['pip get package','pip install package','python install package','pip add package'],ans:1},
+  ],
+};
+
+// ── STORAGE ──────────────────────────────────────────────────
+const S={
+  get:(k,d=null)=>{try{const v=localStorage.getItem('st_'+k);return v?JSON.parse(v):d}catch{return d}},
+  set:(k,v)=>{try{localStorage.setItem('st_'+k,JSON.stringify(v))}catch{}}
+};
+
+// ── STATE ────────────────────────────────────────────────────
+let state={
+  screen:'role',
+  user:null,
+  nav:'dashboard',
+  activeTopic:null,
+  activeCourse:null,
+  lang:'english',
+  mcqState:{},
+  sidebarOpen:false,
+  msg:null,
+};
+
+// ── CORE ─────────────────────────────────────────────────────
+const root=()=>document.getElementById('root');
+
+function render(){
+  // Save scroll position of the page content area before re-render
+  const pageContent=document.querySelector('.page-content');
+  const scrollTop=pageContent?pageContent.scrollTop:0;
+
+  root().innerHTML=buildApp();
+
+  // Restore scroll position after re-render
+  const newPageContent=document.querySelector('.page-content');
+  if(newPageContent && scrollTop>0) newPageContent.scrollTop=scrollTop;
+}
+
+function setState(p){
+  // For navigation changes, scroll to top. For everything else, keep position.
+  const isNavChange = p.nav!==undefined || p.screen!==undefined || p.activeTopic!==undefined;
+  Object.assign(state,p);
+  if(isNavChange){
+    render();
+    // scroll to top on page change
+    const pc=document.querySelector('.page-content');
+    if(pc) pc.scrollTop=0;
+  } else {
+    render();
+  }
+}
+
+// helpers
+function getProgress(id){return S.get('prog_'+id,{})}
+function saveProgress(id,p){S.set('prog_'+id,p)}
+function getSubs(id){return S.get('subs_'+id,{})}
+function saveSub(id,tid,d){const s=getSubs(id);s[tid]=d;S.set('subs_'+id,s)}
+function calcPct(id){const p=getProgress(id);const done=Object.values(p).filter(Boolean).length;return{done,pct:Math.round((done/TOPICS.length)*100)}}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// ── ICONS ────────────────────────────────────────────────────
+function ic(n,s=16){
+  const m={
+    home:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    book:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`,
+    chart:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+    logout:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+    check:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    back:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+    lock:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`,
+    mail:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+    menu:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
+    x:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    video:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>`,
+    code:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+    users:`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>`,
+  };
+  return m[n]||'';
+}
+
+// ════════════════════════════════════════════════════════════
+//  BUILD APP
+// ════════════════════════════════════════════════════════════
+function buildApp(){
+  if(state.screen==='role')         return buildRoleSelect();
+  if(state.screen==='admin-login')  return buildAdminLogin();
+  if(state.screen==='student-login')return buildStudentLogin();
+  if(state.screen==='admin')        return buildAdminShell();
+  if(state.screen==='student')      return buildStudentShell();
+  return '';
+}
+
+// ── ROLE SELECT ──────────────────────────────────────────────
+function buildRoleSelect(){return`
+<div class="auth-screen">
+  <div class="auth-grid"></div>
+  <div class="auth-blob auth-blob-1"></div>
+  <div class="auth-blob auth-blob-2"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">📚</div>
+      <h1>StudyTrack</h1>
+      <p>Python Batch — 2025</p>
+    </div>
+    <div class="role-grid">
+      <div class="role-card" onclick="go('admin-login')">
+        <div class="role-card-icon">🛡️</div>
+        <div class="role-card-label">Admin</div>
+        <div class="role-card-sub">Manage content</div>
+      </div>
+      <div class="role-card" onclick="go('student-login')">
+        <div class="role-card-icon">🎓</div>
+        <div class="role-card-label">Student</div>
+        <div class="role-card-sub">Start learning</div>
+      </div>
+    </div>
+  </div>
+</div>`}
+
+// ── ADMIN LOGIN ──────────────────────────────────────────────
+function buildAdminLogin(){return`
+<div class="auth-screen">
+  <div class="auth-grid"></div>
+  <div class="auth-blob auth-blob-1"></div>
+  <div class="auth-card">
+    <button class="back-btn" onclick="go('role')">${ic('back',13)} Back</button>
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🛡️</div>
+      <h1>Admin Login</h1>
+      <p>Enter your credentials</p>
+    </div>
+    ${state.msg?`<div class="alert alert-error">${ic('x',13)} ${state.msg}</div>`:''}
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="au" placeholder="username" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="ap" placeholder="password" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="adminLogin()">Login as Admin</button>
+  </div>
+</div>`}
+
+// ── STUDENT LOGIN ────────────────────────────────────────────
+function buildStudentLogin(){return`
+<div class="auth-screen">
+  <div class="auth-grid"></div>
+  <div class="auth-blob auth-blob-1"></div>
+  <div class="auth-card">
+    <button class="back-btn" onclick="go('role')">${ic('back',13)} Back</button>
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🎓</div>
+      <h1>Student Login</h1>
+      <p>Pick your name and enter password</p>
+    </div>
+    ${state.msg?`<div class="alert alert-error">${ic('x',13)} ${state.msg}</div>`:''}
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <select class="form-select" id="sname">
+        <option value="">— Select your name —</option>
+        ${STUDENTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="sp" placeholder="enter password" onkeydown="if(event.key==='Enter')studentLogin()"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="studentLogin()">Login</button>
+    <div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:10px;font-size:12px;color:var(--text2);line-height:1.6">
+      💡 Always use the <strong>same browser on the same device</strong> so your progress is saved!
+    </div>
+  </div>
+</div>`}
+
+// ── SIDEBAR ──────────────────────────────────────────────────
+function buildSidebar(role){
+  const isAdmin=role==='admin';
+  const nav=isAdmin?[
+    {key:'dashboard',icon:'home',label:'Dashboard'},
+    {section:'Content'},
+    {key:'topics',icon:'book',label:'Topics & Videos'},
+    {section:'Reports'},
+    {key:'progress',icon:'chart',label:'Student Progress'},
+    {key:'programs',icon:'mail',label:'Submissions'},
+  ]:[
+    {key:'dashboard',icon:'home',label:'Dashboard'},
+    {key:'courses',icon:'book',label:'My Courses'},
+    {key:'progress',icon:'chart',label:'My Progress'},
+  ];
+  const u=state.user;
+  return`
+<nav class="sidebar${state.sidebarOpen?' open':''}" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="s-logo-row">
+      <div class="s-logo-icon">📚</div>
+      <div><div class="s-logo-name">StudyTrack</div><div class="s-logo-sub">Python Batch</div></div>
+    </div>
+  </div>
+  <div style="flex:1;padding-bottom:8px">
+    ${nav.map(item=>item.section
+      ?`<div class="sidebar-section">${item.section}</div>`
+      :`<div class="nav-item${state.nav===item.key?' active':''}" onclick="nav('${item.key}')">
+          <span class="nav-icon">${ic(item.icon,15)}</span>${item.label}
+        </div>`
+    ).join('')}
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="avatar">${isAdmin?'AD':u.avatar}</div>
+      <div><div class="user-name">${isAdmin?'Admin':u.name}</div><div class="user-role">${isAdmin?'Administrator':'Student'}</div></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">${ic('logout',14)} Logout</button>
+  </div>
+</nav>`}
+
+function buildTopbar(title,badge=''){return`
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()">${ic('menu',18)}</button>
+  <div class="topbar-title">${title}</div>
+  ${badge?`<span class="topbar-badge">${badge}</span>`:''}
+</div>`}
+
+// ════════════════════════════════════════════════════════════
+//  ADMIN PAGES
+// ════════════════════════════════════════════════════════════
+function buildAdminShell(){
+  let page='',title='Dashboard',badge='';
+  if(state.nav==='dashboard'){page=adminDashboard();title='Dashboard'}
+  else if(state.nav==='topics'){page=adminTopics();title='Topics & Videos';badge=TOPICS.length+' topics'}
+  else if(state.nav==='progress'){page=adminProgress();title='Student Progress'}
+  else if(state.nav==='programs'){page=adminPrograms();title='Program Submissions'}
+  return`
+<div class="app-shell">
+  ${buildSidebar('admin')}
+  <div class="main-area">
+    ${buildTopbar(title,badge)}
+    <div class="page-content">${page}</div>
+  </div>
+</div>`}
+
+function adminDashboard(){
+  const rows=STUDENTS.map(s=>{const{done,pct}=calcPct(s.id);return{s,done,pct}});
+  const avg=Math.round(rows.reduce((a,x)=>a+x.pct,0)/STUDENTS.length);
+  const totalSubs=STUDENTS.reduce((a,s)=>a+Object.keys(getSubs(s.id)).length,0);
+  return`
+<div class="fade-up">
+  <div class="page-header">
+    <div class="page-title">Dashboard 👋</div>
+    <div class="page-sub">Batch overview and student progress</div>
+  </div>
+  <div class="grid-4" style="margin-bottom:24px">
+    <div class="stat-card"><div class="stat-icon" style="background:var(--accent-bg);color:var(--accent2)">👨‍🎓</div><div><div class="stat-label">Students</div><div class="stat-value" style="color:var(--accent2)">${STUDENTS.length}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--green-bg);color:var(--green)">📋</div><div><div class="stat-label">Topics</div><div class="stat-value" style="color:var(--green)">${TOPICS.length}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--amber-bg);color:var(--amber)">📈</div><div><div class="stat-label">Avg Progress</div><div class="stat-value" style="color:var(--amber)">${avg}%</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--blue-bg);color:var(--blue)">💻</div><div><div class="stat-label">Submissions</div><div class="stat-value" style="color:var(--blue)">${totalSubs}</div></div></div>
+  </div>
+  <div class="card">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:18px">🏆 Student Progress</div>
+    ${rows.map(({s,done,pct})=>`
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+          <div class="avatar" style="width:28px;height:28px;font-size:11px">${s.avatar}</div>
+          <span style="font-size:13px;font-weight:600;flex:1">${s.name}</span>
+          <span style="font-size:12px;color:var(--text2)">${done}/${TOPICS.length}</span>
+          <span style="font-size:13px;font-weight:700;color:${pct>=70?'var(--green)':'var(--accent2)'}">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+    `).join('')}
+  </div>
+</div>`}
+
+function adminTopics(){return`
+<div class="fade-up">
+  <div class="page-header">
+    <div class="page-title">Topics & Video Links</div>
+    <div class="page-sub">Click any topic to add YouTube embed links for English, Hindi, Telugu</div>
+  </div>
+  <div class="alert alert-info">${ic('video',14)} Paste YouTube embed URLs like: <code style="font-family:'JetBrains Mono';font-size:12px">https://www.youtube.com/embed/VIDEO_ID</code></div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    ${TOPICS.map(t=>{
+      const vids=t.videos||{};
+      const hasVids=Object.values(vids).some(v=>v);
+      return`
+      <div class="topic-card" onclick="adminOpenTopic('${t.id}')">
+        <div class="day-pill">Day ${t.day}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${t.title}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc.slice(0,65)}...</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">
+          ${hasVids?`<span class="badge badge-green">${ic('video',10)} Videos</span>`:`<span class="badge badge-lock">No video</span>`}
+          ${t.hasMCQ?`<span class="badge badge-accent">MCQ</span>`:''}
+          ${t.hasProgram?`<span class="badge badge-blue">${ic('code',10)} Prog</span>`:''}
+        </div>
+      </div>`
+    }).join('')}
+  </div>
+</div>
+${state.activeTopic?adminTopicModal():''}`}
+
+function adminTopicModal(){
+  const t=TOPICS.find(x=>x.id===state.activeTopic);
+  if(!t)return'';
+  const vids=t.videos||{};
+  return`
+<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title">Day ${t.day}: ${t.title}</div>
+      <button class="btn btn-secondary btn-xs" onclick="closeModal()">${ic('x',13)}</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7">${t.desc}</p>
+    <div style="font-weight:600;font-size:13px;margin-bottom:14px;color:var(--text2)">🎬 YouTube Embed Links</div>
+    ${['english','hindi','telugu'].map(lang=>`
+      <div class="form-group">
+        <label class="form-label">${lang==='english'?'🇬🇧':lang==='hindi'?'🇮🇳':'🏳️'} ${lang.charAt(0).toUpperCase()+lang.slice(1)}</label>
+        <input class="form-input" id="vid_${lang}" value="${esc(vids[lang]||'')}" placeholder="https://www.youtube.com/embed/VIDEO_ID"/>
+      </div>
+    `).join('')}
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveVideos('${t.id}')">${ic('check',14)} Save Links</button>
+    </div>
+  </div>
+</div>`}
+
+function adminProgress(){return`
+<div class="fade-up">
+  <div class="page-header">
+    <div class="page-title">Student Progress</div>
+    <div class="page-sub">Detailed topic completion for each student</div>
+  </div>
+  ${STUDENTS.map(s=>{
+    const p=getProgress(s.id);
+    const done=Object.values(p).filter(Boolean).length;
+    const pct=Math.round((done/TOPICS.length)*100);
+    const doneTopics=TOPICS.filter(t=>p[t.id]);
+    return`
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div class="avatar" style="width:38px;height:38px;font-size:15px">${s.avatar}</div>
+        <div style="flex:1">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">${s.name}</div>
+          <div style="font-size:12px;color:var(--text2)">${done}/${TOPICS.length} topics completed</div>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:${pct>=70?'var(--green)':'var(--accent2)'}">${pct}%</div>
+      </div>
+      <div class="progress-bar" style="height:6px;margin-bottom:${doneTopics.length?'12':'0'}px"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${doneTopics.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${doneTopics.map(t=>`<span class="badge badge-green" style="font-size:10px">${ic('check',9)} Day ${t.day}: ${t.title}</span>`).join('')}</div>`:`<div style="font-size:12px;color:var(--text3);margin-top:8px">No topics completed yet</div>`}
+    </div>`
+  }).join('')}
+</div>`}
+
+function adminPrograms(){
+  const all=STUDENTS.flatMap(s=>{
+    return Object.entries(getSubs(s.id)).map(([tid,d])=>({s,tid,d,topic:TOPICS.find(t=>t.id===tid)}));
+  }).sort((a,b)=>new Date(b.d.time)-new Date(a.d.time));
+  return`
+<div class="fade-up">
+  <div class="page-header">
+    <div class="page-title">Program Submissions</div>
+    <div class="page-sub">Code submitted by students — review and call them! 📞</div>
+  </div>
+  ${all.length===0
+    ?`<div class="empty-state"><div style="font-size:48px;opacity:0.3;margin-bottom:12px">💻</div><p>No submissions yet</p></div>`
+    :all.map(({s,d,topic})=>`
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div class="avatar" style="width:30px;height:30px;font-size:12px">${s.avatar}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:14px">${s.name}</div>
+            <div style="font-size:12px;color:var(--text2)">${topic?`Day ${topic.day}: ${topic.title}`:''} • ${new Date(d.time).toLocaleString('en-IN')}</div>
+          </div>
+          <span class="badge badge-green">${ic('check',10)} Received</span>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:700;letter-spacing:0.5px">SUBMITTED CODE</div>
+          <pre style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);white-space:pre-wrap;word-break:break-all;line-height:1.6">${esc(d.code)}</pre>
+        </div>
+      </div>
+    `).join('')}
+</div>`}
+
+// ════════════════════════════════════════════════════════════
+//  STUDENT PAGES
+// ════════════════════════════════════════════════════════════
+function buildStudentShell(){
+  let page='',title='Dashboard';
+  if(state.nav==='dashboard'){page=studentDashboard();title='Dashboard'}
+  else if(state.nav==='courses'){page=coursePage();title='My Courses'}
+  else if(state.nav==='progress'){page=studentProgress();title='My Progress'}
+  else if(state.nav==='topic'&&state.activeTopic){page=topicPage();title='Topic'}
+  return`
+<div class="app-shell">
+  ${buildSidebar('student')}
+  <div class="main-area">
+    ${buildTopbar(title)}
+    <div class="page-content">${page}</div>
+  </div>
+</div>`}
+
+function studentDashboard(){
+  const{done,pct}=calcPct(state.user.id);
+  const prog=getProgress(state.user.id);
+  const next=TOPICS.find(t=>!prog[t.id]);
+  const last=[...TOPICS].reverse().find(t=>prog[t.id]);
+  return`
+<div class="fade-up">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="avatar" style="width:52px;height:52px;font-size:20px">${state.user.avatar}</div>
+      <div>
+        <div class="page-title">Hey, ${state.user.name}! 👋</div>
+        <div class="page-sub">Keep pushing — consistency is everything!</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-bottom:24px">
+    <div class="stat-card"><div class="stat-icon" style="background:var(--green-bg);color:var(--green)">✅</div><div><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--green)">${done}/${TOPICS.length}</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--amber-bg);color:var(--amber)">🎯</div><div><div class="stat-label">Progress</div><div class="stat-value" style="color:var(--amber)">${pct}%</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:var(--accent-bg);color:var(--accent2)">⏳</div><div><div class="stat-label">Remaining</div><div class="stat-value">${TOPICS.length-done}</div></div></div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+      <span style="color:var(--text2);font-weight:500">Overall Progress</span>
+      <span style="font-weight:700;color:${pct>=70?'var(--green)':'var(--accent2)'}">${pct}%</span>
+    </div>
+    <div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:24px">
+    ${next?`<div class="card card-hover" onclick="openTopic('${next.id}')">
+      <div style="font-size:11px;color:var(--accent2);font-weight:700;margin-bottom:8px;letter-spacing:0.5px">▶ CONTINUE LEARNING</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Day ${next.day}: ${next.title}</div>
+      <div style="font-size:12px;color:var(--text2)">${next.desc.slice(0,80)}...</div>
+    </div>`:''}
+    ${last?`<div class="card">
+      <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px;letter-spacing:0.5px">✅ LAST COMPLETED</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Day ${last.day}: ${last.title}</div>
+      <div style="font-size:12px;color:var(--text2)">Great work! 🔥 Keep the momentum going!</div>
+    </div>`:''}
+  </div>
+  <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px">📚 Your Courses</div>
+  <div class="grid-2">
+    <div class="course-card" onclick="nav('courses')">
+      <div class="course-card-glow"></div>
+      <div class="course-icon">🐍</div>
+      <div class="course-name">Python Basics</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">${done}/${TOPICS.length} topics • ${pct}% complete</div>
+      <div class="progress-bar" style="height:4px"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="course-card locked" onclick="dsaLocked()">
+      <div class="course-icon">🌳</div>
+      <div class="course-name">DSA &nbsp;🔒</div>
+      <div style="font-size:12px;color:var(--text3)">Complete Python first to unlock</div>
+    </div>
+  </div>
+</div>`}
+
+function coursePage(){
+  if(state.activeCourse==='dsa'){
+    const{done,pct}=calcPct(state.user.id);
+    return`
+    <div class="fade-up">
+      <button class="btn btn-secondary btn-sm" onclick="setState({activeCourse:null})" style="margin-bottom:20px">${ic('back',13)} Back</button>
+      <div class="locked-screen">
+        <div class="lock-icon-big">🔒</div>
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:10px">DSA is Locked</div>
+        <div style="color:var(--text2);font-size:14px;max-width:300px;line-height:1.7">Complete all Python topics first to unlock Data Structures & Algorithms!</div>
+        <div style="margin-top:24px;width:280px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:7px">
+            <span>Python Progress</span><span style="font-weight:600">${done}/${TOPICS.length}</span>
+          </div>
+          <div class="progress-bar" style="height:7px"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:20px" onclick="setState({activeCourse:null})">${ic('back',13)} Back</button>
+      </div>
+    </div>`}
+  const prog=getProgress(state.user.id);
+  const{done,pct}=calcPct(state.user.id);
+  return`
+<div class="fade-up">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:32px">🐍</span>
+      <div>
+        <div class="page-title">Python Basics</div>
+        <div class="page-sub">${done}/${TOPICS.length} completed • ${pct}%</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px">
+      <span style="color:var(--text2)">Overall</span>
+      <span style="font-weight:700;color:${pct>=70?'var(--green)':'var(--accent2)'}">${pct}%</span>
+    </div>
+    <div class="progress-bar" style="height:7px"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    ${TOPICS.map(t=>{
+      const done2=prog[t.id];
+      return`
+      <div class="topic-card${done2?' completed':''}" onclick="openTopic('${t.id}')">
+        <div class="day-pill">Day ${t.day}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:14px">${t.title}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc.slice(0,65)}...</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          ${t.hasMCQ?`<span class="badge badge-accent" style="font-size:10px">MCQ</span>`:''}
+          ${t.hasProgram?`<span class="badge badge-blue" style="font-size:10px">${ic('code',9)}</span>`:''}
+          ${done2?`<span class="badge badge-green" style="font-size:10px">${ic('check',9)}</span>`:''}
+        </div>
+      </div>`
+    }).join('')}
+  </div>
+  <div style="margin-top:20px">
+    <div class="course-card locked" onclick="dsaLocked()">
+      <div class="course-icon">🌳</div>
+      <div class="course-name">DSA — Data Structures & Algorithms 🔒</div>
+      <div style="font-size:12px;color:var(--text3)">Unlocks after completing Python</div>
+    </div>
+  </div>
+</div>`}
+
+// ── TOPIC PAGE ────────────────────────────────────────────────
+function topicPage(){
+  const t=TOPICS.find(x=>x.id===state.activeTopic);
+  if(!t)return'';
+  const prog=getProgress(state.user.id);
+  const isCompleted=prog[t.id];
+  const vids=t.videos||{};
+  const lang=state.lang||'english';
+  const videoUrl=vids[lang];
+  const mcqs=MCQS[t.id]||[];
+  const ms=state.mcqState||{};
+  const subs=getSubs(state.user.id);
+  const submitted=subs[t.id];
+  return`
+<div class="fade-up">
+  <button class="btn btn-secondary btn-sm" onclick="backFromTopic()" style="margin-bottom:20px">${ic('back',13)} Back</button>
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span class="day-pill">Day ${t.day}</span>
+      ${isCompleted?`<span class="badge badge-green">${ic('check',10)} Completed</span>`:''}
+    </div>
+    <div class="page-title">${t.title}</div>
+  </div>
+
+  <!-- VIDEO -->
+  <div class="card" style="margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div style="font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px">${ic('video',15)} Video Lecture</div>
+      <div style="display:flex;gap:7px">
+        ${['english','hindi','telugu'].map(l=>`
+          <button class="lang-btn${lang===l?' active':''}" onclick="setLang('${l}')">${l==='english'?'🇬🇧 EN':l==='hindi'?'🇮🇳 HI':'🏳️ TE'}</button>
+        `).join('')}
+      </div>
+    </div>
+    ${videoUrl
+      ?`<div class="video-wrap"><iframe src="${videoUrl}" allowfullscreen title="${t.title}"></iframe></div>`
+      :`<div class="video-wrap"><div class="video-placeholder"><span style="font-size:36px">🎬</span><span style="font-size:13px;text-align:center">Video not added yet!<br/>Check back soon.</span></div></div>`}
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="card" style="margin-bottom:20px">
+    <div style="font-weight:700;font-size:14px;margin-bottom:10px">📖 Summary</div>
+    <p style="font-size:14px;color:var(--text2);line-height:1.8">${t.desc}</p>
+  </div>
+
+  <!-- MARK COMPLETE -->
+  ${!isCompleted
+    ?`<button class="btn btn-success" style="margin-bottom:20px" onclick="markComplete('${t.id}')">${ic('check',14)} Mark as Completed</button>`
+    :`<div class="alert alert-success" style="margin-bottom:20px">${ic('check',14)} You completed this topic! Great work 🎉</div>`}
+
+  <!-- MCQ -->
+  ${mcqs.length>0?`
+  <div class="card" style="margin-bottom:20px">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px">🔘 MCQ Quiz (${mcqs.length} questions)</div>
+    ${mcqs.map((q,qi)=>{
+      const chosen=ms[qi];
+      const done2=ms['s'+qi];
+      return`
+      <div style="margin-bottom:20px${qi<mcqs.length-1?';padding-bottom:20px;border-bottom:1px solid var(--border)':''}">
+        <div style="font-weight:600;font-size:14px;margin-bottom:12px;line-height:1.5">Q${qi+1}. ${q.q}</div>
+        ${q.opts.map((opt,oi)=>{
+          let cls='mcq-option';
+          if(done2){if(oi===q.ans)cls+=' correct';else if(oi===chosen&&chosen!==q.ans)cls+=' wrong';}
+          else if(chosen===oi)cls+=' selected';
+          return`<div class="${cls}" onclick="${done2?'':'selectMCQ('+qi+','+oi+')'}" style="${done2?'cursor:default':''}">
+            <div class="mcq-circle">${done2&&oi===q.ans?'✓':done2&&oi===chosen&&chosen!==q.ans?'✗':String.fromCharCode(65+oi)}</div>${opt}
+          </div>`
+        }).join('')}
+        ${!done2
+          ?`<button class="btn btn-primary btn-sm" onclick="submitMCQ(${qi})" style="margin-top:8px" ${chosen===undefined?'disabled':''}>Submit Answer</button>`
+          :`<div class="alert ${chosen===q.ans?'alert-success':'alert-error'}" style="margin-top:8px;margin-bottom:0">
+              ${chosen===q.ans?`${ic('check',13)} Correct! Well done! 🎉`:`${ic('x',13)} Wrong! Correct answer: <strong>${q.opts[q.ans]}</strong>`}
+            </div>`}
+      </div>`
+    }).join('')}
+  </div>
+  `:''}
+
+  <!-- PROGRAM -->
+  ${t.hasProgram?`
+  <div class="card">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px">${ic('code',16)} Programming Challenge</div>
+    <div style="font-size:14px;color:var(--text2);line-height:1.8;background:var(--bg3);padding:14px;border-radius:10px;border-left:3px solid var(--accent);margin-bottom:16px">
+      📝 ${t.programQ}
+    </div>
+    ${submitted?`
+      <div class="alert alert-success">${ic('check',14)} Submitted! Chetan will review and call you 📞</div>
+      <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-top:10px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-weight:700;letter-spacing:0.5px">YOUR SUBMISSION</div>
+        <pre style="font-family:'JetBrains Mono',monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;color:var(--text);line-height:1.6">${esc(submitted.code)}</pre>
+      </div>
+      <button class="btn btn-secondary btn-sm" style="margin-top:12px" onclick="resubmit('${t.id}')">✏️ Resubmit</button>
+    `:`
+      <textarea class="form-textarea" id="code_${t.id}" placeholder="# Write your Python solution here...&#10;# Take your time and think it through!&#10;&#10;"></textarea>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="sbtn_${t.id}" onclick="submitProgram('${t.id}')">${ic('mail',14)} Submit to Chetan</button>
+        <span style="font-size:12px;color:var(--text2)">He'll review and call you! 📞</span>
+      </div>
+    `}
+  </div>
+  `:''}
+</div>`}
+
+function studentProgress(){
+  const prog=getProgress(state.user.id);
+  const{done,pct}=calcPct(state.user.id);
+  const subs=getSubs(state.user.id);
+  return`
+<div class="fade-up">
+  <div class="page-header"><div class="page-title">My Progress</div></div>
+  <div class="card" style="margin-bottom:24px;text-align:center;padding:36px">
+    <div style="font-family:'Syne',sans-serif;font-size:60px;font-weight:800;color:${pct>=70?'var(--green)':'var(--accent2)'}">${pct}%</div>
+    <div style="color:var(--text2);margin-bottom:20px;font-size:14px">${done} of ${TOPICS.length} topics completed</div>
+    <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div class="card">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px">📋 All Topics</div>
+    ${TOPICS.map(t=>{
+      const done2=prog[t.id];
+      const hasSub=subs[t.id];
+      return`
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="width:22px;height:22px;border-radius:50%;border:2px solid ${done2?'var(--green)':'var(--border2)'};background:${done2?'var(--green-bg)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green);font-size:10px">${done2?'✓':''}</div>
+        <span class="day-pill" style="font-size:10px">Day ${t.day}</span>
+        <span style="font-size:13px;flex:1;color:${done2?'var(--text)':'var(--text2)'};font-weight:${done2?600:400}">${t.title}</span>
+        ${hasSub?`<span class="badge badge-blue" style="font-size:10px">${ic('code',9)} Submitted</span>`:''}
+      </div>`
+    }).join('')}
+  </div>
+</div>`}
+
+// ════════════════════════════════════════════════════════════
+//  HANDLERS
+// ════════════════════════════════════════════════════════════
+window.go=s=>setState({screen:s,msg:null});
+window.nav=k=>setState({nav:k,activeTopic:null,activeCourse:null,lang:'english',mcqState:{}});
+window.logout=()=>setState({screen:'role',user:null,nav:'dashboard',msg:null,sidebarOpen:false});
+window.closeModal=()=>setState({activeTopic:null});
+window.toggleSidebar=()=>setState({sidebarOpen:!state.sidebarOpen});
+window.dsaLocked=()=>setState({nav:'courses',activeCourse:'dsa'});
+window.setLang=l=>setState({lang:l});
+
+window.adminLogin=()=>{
+  const u=document.getElementById('au')?.value.trim();
+  const p=document.getElementById('ap')?.value;
+  if(u==='chetan'&&p==='90opklnm') setState({screen:'admin',user:{role:'admin'},nav:'dashboard',msg:null});
+  else setState({msg:'Wrong username or password!'});
+};
+
+window.studentLogin=()=>{
+  const id=document.getElementById('sname')?.value;
+  const p=document.getElementById('sp')?.value;
+  if(!id){setState({msg:'Please select your name'});return}
+  const s=STUDENTS.find(x=>x.id===id);
+  if(!s||s.password!==p){setState({msg:'Wrong password! Try again.'});return}
+  setState({screen:'student',user:{id:s.id,name:s.name,avatar:s.avatar},nav:'dashboard',msg:null});
+};
+
+window.adminOpenTopic=id=>setState({activeTopic:id});
+
+window.saveVideos=id=>{
+  const vids={
+    english:document.getElementById('vid_english')?.value.trim()||'',
+    hindi:document.getElementById('vid_hindi')?.value.trim()||'',
+    telugu:document.getElementById('vid_telugu')?.value.trim()||'',
+  };
+  S.set('videos_'+id,vids);
+  setState({activeTopic:null});
+};
+
+window.openTopic=id=>setState({nav:'topic',activeTopic:id,lang:'english',mcqState:{}});
+window.backFromTopic=()=>setState({nav:'courses',activeTopic:null,lang:'english',mcqState:{}});
+
+window.markComplete=tid=>{
+  const p=getProgress(state.user.id);
+  p[tid]=true;
+  saveProgress(state.user.id,p);
+  render();
+};
+
+window.selectMCQ=(qi,oi)=>{
+  const ms={...state.mcqState};
+  if(ms['s'+qi])return;
+  ms[qi]=oi;
+  setState({mcqState:ms});
+};
+
+window.submitMCQ=qi=>{
+  const ms={...state.mcqState};
+  if(ms[qi]===undefined)return;
+  ms['s'+qi]=true;
+  setState({mcqState:ms});
+};
+
+window.submitProgram=async id=>{
+  const code=document.getElementById('code_'+id)?.value.trim();
+  if(!code){alert('Please write your code first!');return}
+  const btn=document.getElementById('sbtn_'+id);
+  if(btn){btn.disabled=true;btn.innerHTML=`<div class="spinner"></div> Submitting...`}
+  const t=TOPICS.find(x=>x.id===id);
+  try{
+    const r=await fetch(FORMSPREE,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        student:state.user.name,
+        topic:`Day ${t.day}: ${t.title}`,
+        question:t.programQ,
+        code,
+        time:new Date().toLocaleString('en-IN'),
+        _subject:`[StudyTrack] ${state.user.name} — Day ${t.day}: ${t.title}`,
+      })
+    });
+    if(r.ok){saveSub(state.user.id,id,{code,time:new Date().toISOString()});render()}
+    else{if(btn){btn.disabled=false;btn.innerHTML=`${ic('mail',14)} Submit to Chetan`}alert('Submission failed. Check your internet!')}
+  }catch{if(btn){btn.disabled=false;btn.innerHTML=`${ic('mail',14)} Submit to Chetan`}alert('Network error! Check your internet connection.')}
+};
+
+window.resubmit=id=>{
+  if(!confirm('Resubmit this assignment?'))return;
+  const s=getSubs(state.user.id);
+  delete s[id];
+  S.set('subs_'+state.user.id,s);
+  render();
+};
+
+// close sidebar on outside click
+document.addEventListener('click',e=>{
+  if(state.sidebarOpen&&!e.target.closest('#sidebar')&&!e.target.closest('.menu-btn'))
+    setState({sidebarOpen:false});
+});
+
+// BOOT
+render();
+</script>
+</body>
+</html>
